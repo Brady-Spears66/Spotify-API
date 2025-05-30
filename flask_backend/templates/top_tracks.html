@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Top Tracks</title>
+    <style>
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+      }
+      img {
+        width: 64px;
+        height: 64px;
+        margin-right: 15px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Top Tracks</h2>
+    <ul>
+      {% for track in tracks %}
+      <li>
+        <img src="{{ track.album.images[0].url }}" alt="Album Cover" />
+        <div>
+          <strong>{{ track.name }}</strong><br />
+          <em>by {{ track.artists[0].name }}</em>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    <a href="/menu">Back to Menu</a>
+  </body>
+</html>
