@@ -1,3 +1,4 @@
 # Hidden files
 .env
 .spotifyvenv/
+.spotifyvenv
