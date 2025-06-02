@@ -6,14 +6,25 @@ import Navbar from "./components/navbar";
 import logo from "./images/Spotify_icon.svg";
 import TopTracks from "./pages/TopTracks";
 import TopArtists from "./pages/TopArtists";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { User } from "./types";
+import Profile from "./pages/Profile";
 
 function App() {
   // @ts-ignore
   const loc = useLocation().pathname.replace(/^\/+/, "") || "Home";
   const titleString = loc.charAt(0).toUpperCase() + loc.slice(1) + " Page";
-  const [userProfile, setUserProfile] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<User | null>(() => {
+    const stored = localStorage.getItem("userProfile");
+    return stored ? JSON.parse(stored) : null;
+  });
+
+  // Save to localStorage whenever it changes
+  useEffect(() => {
+    if (userProfile) {
+      localStorage.setItem("userProfile", JSON.stringify(userProfile));
+    }
+  }, [userProfile]);
 
   return (
     <HelmetProvider>
@@ -45,6 +56,10 @@ function App() {
             />
             <Route path="/top-tracks" element={<TopTracks />} />
             <Route path="/top-artists" element={<TopArtists />} />
+            <Route
+              path="/profile"
+              element={<Profile userProfile={userProfile} />}
+            ></Route>
             {/* Add other routes here as needed */}
           </Routes>
         </Container>

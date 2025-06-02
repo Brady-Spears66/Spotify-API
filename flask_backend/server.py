@@ -120,15 +120,15 @@ def get_user_profile():
     headers = {"Authorization": f"Bearer {access_token}"}
     res = requests.get(url, headers=headers)
     if res.status_code != 200:
-        print("Top tracks error:", res.status_code, res.text)
-        return None
+        print("User Profile error:", res.status_code, res.text)
+        return jsonify({"error": "Failed to fetch user profile", "details": res.json()}), res.status_code
 
     data = res.json()
 
     user = {
         "username": data["display_name"],
         "email": data["email"],
-        "followers": data["followers"],
+        "followers": data["followers"]['total'],
         "image": data["images"][0] if data["images"] else "",
         "country": data["country"]
     }

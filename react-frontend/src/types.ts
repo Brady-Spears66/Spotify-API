@@ -1,7 +1,7 @@
 type User = {
   username: string;
   email: string;
-  followers: string;
+  followers: number;
   image: string;
   country: string;
 };

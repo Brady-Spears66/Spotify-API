@@ -225,7 +225,20 @@ const ResponsiveAppBar: React.FC<NavProps> = ({ userProfile }) => {
             }}
           >
             {userProfile && (
-              <>
+              <IconButton
+                onClick={() => navigate("/profile")}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  borderRadius: 5,
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  },
+                  "&:focus": { outline: "none" },
+                  "&:focus-visible": { outline: "none" },
+                }}
+              >
                 <Avatar
                   sx={{
                     bgcolor: theme.palette.secondary.main,
@@ -246,7 +259,7 @@ const ResponsiveAppBar: React.FC<NavProps> = ({ userProfile }) => {
                 >
                   {userProfile.username}
                 </Typography>
-              </>
+              </IconButton>
             )}
           </Box>
         </Toolbar>

@@ -51,7 +51,7 @@ const TopTracksPage = () => {
       }}
     >
       <Typography variant="h2" gutterBottom textAlign="center">
-        Your Top Artists
+        Your Top Tracks
       </Typography>
 
       {loading ? (

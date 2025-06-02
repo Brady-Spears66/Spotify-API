@@ -55,6 +55,7 @@ const Home: React.FC<HomeProps> = ({ setUserProfile }) => {
   const logout = () => {
     localStorage.removeItem("spotify_access_token");
     localStorage.removeItem("spotify_refresh_token");
+    localStorage.removeItem("userProfile");
     setLoggedIn(false);
     setUserProfile(null);
   };
