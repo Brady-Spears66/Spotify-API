@@ -2,3 +2,5 @@
 .env
 .spotifyvenv/
 .spotifyvenv
+__pycache__/
+__pycache__
