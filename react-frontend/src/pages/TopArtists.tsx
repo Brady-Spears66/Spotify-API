@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { Box, Stack, Typography, CircularProgress } from "@mui/material";
-
-interface Artist {
-  name: string;
-  genres: string[];
-  image: string;
-}
+import type { Artist } from "../types";
 
 const TopArtistsPage = () => {
   const [artists, setArtists] = useState<Artist[]>([]);

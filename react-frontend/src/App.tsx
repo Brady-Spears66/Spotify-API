@@ -6,11 +6,14 @@ import Navbar from "./components/navbar";
 import logo from "./images/Spotify_icon.svg";
 import TopTracks from "./pages/TopTracks";
 import TopArtists from "./pages/TopArtists";
+import { useState } from "react";
+import type { User } from "./types";
 
 function App() {
   // @ts-ignore
   const loc = useLocation().pathname.replace(/^\/+/, "") || "Home";
   const titleString = loc.charAt(0).toUpperCase() + loc.slice(1) + " Page";
+  const [userProfile, setUserProfile] = useState<User | null>(null);
 
   return (
     <HelmetProvider>
@@ -27,7 +30,7 @@ function App() {
           overflow: "hidden",
         }}
       >
-        <Navbar />
+        <Navbar userProfile={userProfile} />
         <Container
           sx={{
             mt: 5,
@@ -36,7 +39,10 @@ function App() {
           }}
         >
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route
+              path="/"
+              element={<Home setUserProfile={setUserProfile} />}
+            />
             <Route path="/top-tracks" element={<TopTracks />} />
             <Route path="/top-artists" element={<TopArtists />} />
             {/* Add other routes here as needed */}

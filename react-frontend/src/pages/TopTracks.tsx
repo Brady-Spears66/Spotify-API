@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { Box, Stack, Typography, CircularProgress } from "@mui/material";
-
-interface Track {
-  name: string;
-  artists: string[];
-  albumImage: string;
-}
+import type { Track } from "../types";
 
 const TopTracksPage = () => {
   const [tracks, setTracks] = useState<Track[]>([]);

@@ -26,7 +26,8 @@ def login_url():
         "client_id": client_id,
         "response_type": "code",
         "redirect_uri": redirect_uri,
-        "scope": scope
+        "scope": scope,
+        "show_dialog": "true"
     }
     query_string = urllib.parse.urlencode(params)
     return jsonify({"url": f"{auth_url}?{query_string}"})

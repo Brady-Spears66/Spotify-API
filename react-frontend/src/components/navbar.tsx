@@ -11,8 +11,13 @@ import MenuItem from "@mui/material/MenuItem";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Avatar, useTheme } from "@mui/material";
 import spotifyLogo from "../images/Spotify_icon.svg";
+import type { User } from "../types";
 
-function ResponsiveAppBar() {
+interface NavProps {
+  userProfile: User | null;
+}
+
+const ResponsiveAppBar: React.FC<NavProps> = ({ userProfile }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,14 +29,6 @@ function ResponsiveAppBar() {
     path: string;
   };
 
-  interface User {
-    username: string;
-    email: string;
-    followers: string;
-    image: string;
-    country: string;
-  }
-
   const navItems = [
     { label: "Home", path: "/" },
     { label: "Top Tracks", path: "/top-tracks" },
@@ -41,9 +38,6 @@ function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
-  const [user, setUser] = React.useState<User>();
-  const [error, setError] = React.useState<string | null>(null);
-  const [loading, setLoading] = React.useState<boolean>(true);
 
   const getInitials = (name: string | null) => {
     if (!name) return "";
@@ -52,36 +46,6 @@ function ResponsiveAppBar() {
       ? words[0][0].toUpperCase()
       : (words[0][0] + words[1][0]).toUpperCase();
   };
-
-  React.useEffect(() => {
-    const token = localStorage.getItem("spotify_access_token");
-    if (!token) {
-      setError("Missing access token.");
-      setLoading(false);
-      return;
-    }
-
-    fetch("http://127.0.0.1:5000/user-profile", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.username) {
-          setUser(data);
-        } else {
-          setError("Unexpected response from server.");
-          console.error("Server response:", data);
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Fetch error:", err);
-        setError("Failed to load user profile.");
-        setLoading(false);
-      });
-  }, []);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -260,7 +224,7 @@ function ResponsiveAppBar() {
               flex: "0 0 auto",
             }}
           >
-            {!loading && user && (
+            {userProfile && (
               <>
                 <Avatar
                   sx={{
@@ -270,7 +234,7 @@ function ResponsiveAppBar() {
                     fontSize: "0.9rem",
                   }}
                 >
-                  {getInitials(user.username)}
+                  {getInitials(userProfile.username)}
                 </Avatar>
                 <Typography
                   variant="subtitle1"
@@ -280,7 +244,7 @@ function ResponsiveAppBar() {
                     fontSize: { xs: "0.8rem", sm: "1rem" },
                   }}
                 >
-                  {user.username}
+                  {userProfile.username}
                 </Typography>
               </>
             )}
@@ -289,6 +253,6 @@ function ResponsiveAppBar() {
       </Box>
     </AppBar>
   );
-}
+};
 
 export default ResponsiveAppBar;

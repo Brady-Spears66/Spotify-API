@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { Button, Box, Typography, CircularProgress } from "@mui/material";
+import type { User } from "../types";
 
-const Home = () => {
+interface HomeProps {
+  setUserProfile: React.Dispatch<React.SetStateAction<User | null>>;
+}
+
+const Home: React.FC<HomeProps> = ({ setUserProfile }) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -21,6 +26,18 @@ const Home = () => {
     } else if (tokenFromStorage) {
       setLoggedIn(true);
     }
+    const token = localStorage.getItem("spotify_access_token");
+    fetch("http://127.0.0.1:5000/user-profile", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => setUserProfile(data))
+      .catch((err) => {
+        console.error("Failed to fetch user profile", err);
+        setUserProfile(null);
+      });
   }, []);
 
   const login = async () => {
@@ -39,6 +56,7 @@ const Home = () => {
     localStorage.removeItem("spotify_access_token");
     localStorage.removeItem("spotify_refresh_token");
     setLoggedIn(false);
+    setUserProfile(null);
   };
 
   return (
@@ -60,8 +78,9 @@ const Home = () => {
           <Typography variant="h5" color="success.main">
             ✅ Successfully Logged In To Spotify!
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Navigate to Top Tracks or Top Artists to see your stats!
+          <Typography variant="body1">
+            Navigate to Top Tracks or Top Artists to see statistics about your
+            profile.
           </Typography>
           <Button
             variant="outlined"
