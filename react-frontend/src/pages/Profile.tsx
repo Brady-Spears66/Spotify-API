@@ -1,12 +1,26 @@
 import React from "react";
-import { Box, Typography, Avatar, Paper } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Avatar,
+  Paper,
+  useTheme,
+  Button,
+} from "@mui/material";
 import type { User } from "../types";
 
 interface ProfileProps {
   userProfile: User | null;
+  setUserProfile: React.Dispatch<React.SetStateAction<User | null>>;
+  setLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Profile: React.FC<ProfileProps> = ({ userProfile }) => {
+const Profile: React.FC<ProfileProps> = ({
+  userProfile,
+  setUserProfile,
+  setLoggedIn,
+}) => {
+  const theme = useTheme();
   if (!userProfile) {
     return (
       <Box
@@ -23,6 +37,14 @@ const Profile: React.FC<ProfileProps> = ({ userProfile }) => {
       </Box>
     );
   }
+
+  const logout = () => {
+    localStorage.removeItem("spotify_access_token");
+    localStorage.removeItem("spotify_refresh_token");
+    localStorage.removeItem("userProfile");
+    setLoggedIn(false);
+    setUserProfile(null);
+  };
 
   return (
     <Box
@@ -46,7 +68,7 @@ const Profile: React.FC<ProfileProps> = ({ userProfile }) => {
           borderRadius: 4,
           minWidth: "300px",
           maxWidth: "500px",
-          bgcolor: "grey",
+          bgcolor: "#1ED760",
         }}
       >
         <Box
@@ -60,7 +82,12 @@ const Profile: React.FC<ProfileProps> = ({ userProfile }) => {
           <Avatar
             src={userProfile.image}
             alt={userProfile.username}
-            sx={{ width: 100, height: 100, fontSize: "2rem" }}
+            sx={{
+              width: 100,
+              height: 100,
+              fontSize: "2rem",
+              bgcolor: theme.palette.secondary.main,
+            }}
           >
             {!userProfile.image && userProfile.username[0].toUpperCase()}
           </Avatar>
@@ -82,6 +109,14 @@ const Profile: React.FC<ProfileProps> = ({ userProfile }) => {
           </Typography>
         </Box>
       </Paper>
+
+      <Button
+        variant="outlined"
+        sx={{ bgcolor: "grey", color: "text.primary" }}
+        onClick={logout}
+      >
+        Logout
+      </Button>
     </Box>
   );
 };

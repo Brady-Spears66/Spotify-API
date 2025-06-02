@@ -15,12 +15,50 @@ import type { User } from "../types";
 
 interface NavProps {
   userProfile: User | null;
+  loggedIn: boolean;
+  setLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+  setUserProfile: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
-const ResponsiveAppBar: React.FC<NavProps> = ({ userProfile }) => {
+const ResponsiveAppBar: React.FC<NavProps> = ({
+  userProfile,
+  loggedIn,
+  setLoggedIn,
+  setUserProfile,
+}) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+
+  React.useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const accessTokenFromUrl = query.get("access_token");
+    const refreshTokenFromUrl = query.get("refresh_token");
+    const tokenFromStorage = localStorage.getItem("spotify_access_token");
+
+    if (accessTokenFromUrl && refreshTokenFromUrl) {
+      // Store both tokens
+      localStorage.setItem("spotify_access_token", accessTokenFromUrl);
+      localStorage.setItem("spotify_refresh_token", refreshTokenFromUrl);
+      setLoggedIn(true);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (tokenFromStorage) {
+      setLoggedIn(true);
+    }
+    const token = localStorage.getItem("spotify_access_token");
+    fetch("http://127.0.0.1:5000/user-profile", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => setUserProfile(data))
+      .catch((err) => {
+        console.error("Failed to fetch user profile", err);
+        setUserProfile(null);
+      });
+  }, []);
 
   const backgroundColor = theme.palette.mode === "dark" ? "#101010" : "grey";
 
@@ -38,6 +76,12 @@ const ResponsiveAppBar: React.FC<NavProps> = ({ userProfile }) => {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
+
+  const handleLogin = async () => {
+    const res = await fetch("http://127.0.0.1:5000/login-url");
+    const data = await res.json();
+    window.location.href = data.url;
+  };
 
   const getInitials = (name: string | null) => {
     if (!name) return "";
@@ -150,7 +194,7 @@ const ResponsiveAppBar: React.FC<NavProps> = ({ userProfile }) => {
                       textAlign: "center",
                       color:
                         location.pathname === item.path
-                          ? theme.palette.secondary.main
+                          ? "#1DB954"
                           : theme.palette.text.primary,
                     }}
                   >
@@ -195,17 +239,8 @@ const ResponsiveAppBar: React.FC<NavProps> = ({ userProfile }) => {
                   px: 2,
                   py: 1,
                   borderRadius: 5,
-                  color:
-                    location.pathname === item.path
-                      ? theme.palette.secondary.main
-                      : "white",
+                  color: location.pathname === item.path ? "#1DB954" : "white",
                   fontSize: { md: "0.7rem", lg: "1.2rem" },
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.1)",
-                    borderBottomColor: "rgb(25, 190, 207)",
-                  },
-                  "&:focus": { outline: "none" },
-                  "&:focus-visible": { outline: "none" },
                 }}
               >
                 {item.label}
@@ -224,7 +259,7 @@ const ResponsiveAppBar: React.FC<NavProps> = ({ userProfile }) => {
               flex: "0 0 auto",
             }}
           >
-            {userProfile && (
+            {loggedIn && userProfile ? (
               <IconButton
                 onClick={() => navigate("/profile")}
                 sx={{
@@ -260,6 +295,14 @@ const ResponsiveAppBar: React.FC<NavProps> = ({ userProfile }) => {
                   {userProfile.username}
                 </Typography>
               </IconButton>
+            ) : (
+              <Button
+                variant="contained"
+                sx={{ bgcolor: "#1ED760" }}
+                onClick={handleLogin}
+              >
+                Login with Spotify
+              </Button>
             )}
           </Box>
         </Toolbar>

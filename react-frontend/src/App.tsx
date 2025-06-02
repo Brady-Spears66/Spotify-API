@@ -18,13 +18,38 @@ function App() {
     const stored = localStorage.getItem("userProfile");
     return stored ? JSON.parse(stored) : null;
   });
+  const [loggedIn, setLoggedIn] = useState<boolean>(
+    !!localStorage.getItem("spotify_access_token")
+  );
 
-  // Save to localStorage whenever it changes
+  // Handle token parsing once, here
   useEffect(() => {
-    if (userProfile) {
-      localStorage.setItem("userProfile", JSON.stringify(userProfile));
+    const query = new URLSearchParams(window.location.search);
+    const accessToken = query.get("access_token");
+    const refreshToken = query.get("refresh_token");
+
+    if (accessToken && refreshToken) {
+      localStorage.setItem("spotify_access_token", accessToken);
+      localStorage.setItem("spotify_refresh_token", refreshToken);
+      setLoggedIn(true);
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, [userProfile]);
+
+    const token = localStorage.getItem("spotify_access_token");
+
+    if (token) {
+      fetch("http://127.0.0.1:5000/user-profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) => setUserProfile(data))
+        .catch(() => {
+          localStorage.removeItem("spotify_access_token");
+          setLoggedIn(false);
+          setUserProfile(null);
+        });
+    }
+  }, []);
 
   return (
     <HelmetProvider>
@@ -41,7 +66,12 @@ function App() {
           overflow: "hidden",
         }}
       >
-        <Navbar userProfile={userProfile} />
+        <Navbar
+          userProfile={userProfile}
+          loggedIn={loggedIn}
+          setLoggedIn={setLoggedIn}
+          setUserProfile={setUserProfile}
+        />
         <Container
           sx={{
             mt: 5,
@@ -50,15 +80,18 @@ function App() {
           }}
         >
           <Routes>
-            <Route
-              path="/"
-              element={<Home setUserProfile={setUserProfile} />}
-            />
+            <Route path="/" element={<Home />} />
             <Route path="/top-tracks" element={<TopTracks />} />
             <Route path="/top-artists" element={<TopArtists />} />
             <Route
               path="/profile"
-              element={<Profile userProfile={userProfile} />}
+              element={
+                <Profile
+                  userProfile={userProfile}
+                  setUserProfile={setUserProfile}
+                  setLoggedIn={setLoggedIn}
+                />
+              }
             ></Route>
             {/* Add other routes here as needed */}
           </Routes>
