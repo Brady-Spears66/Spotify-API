@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Box, Stack, Typography, CircularProgress } from "@mui/material";
 
-interface Track {
+interface Artist {
   name: string;
-  artists: string[];
-  albumImage: string;
+  genres: string[];
+  image: string;
 }
 
-const TopTracksPage = () => {
-  const [tracks, setTracks] = useState<Track[]>([]);
+const TopArtistsPage = () => {
+  const [artists, setArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,7 +20,7 @@ const TopTracksPage = () => {
       return;
     }
 
-    fetch("http://127.0.0.1:5000/top-tracks", {
+    fetch("http://127.0.0.1:5000/top-artists", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -28,8 +28,7 @@ const TopTracksPage = () => {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          setTracks(data);
-          console.log(data);
+          setArtists(data);
         } else {
           setError("Unexpected response from server.");
           console.error("Server response:", data);
@@ -65,13 +64,13 @@ const TopTracksPage = () => {
         <Typography color="error" variant="body1" textAlign="center">
           {error}
         </Typography>
-      ) : tracks.length === 0 ? (
+      ) : artists.length === 0 ? (
         <Typography variant="body1" color="text.secondary" textAlign="center">
           No top artists available.
         </Typography>
       ) : (
         <Stack spacing={3} alignItems="center" width="100%" maxWidth={800}>
-          {tracks.map((track, index) => (
+          {artists.map((artist, index) => (
             <Stack
               key={index}
               direction="row"
@@ -92,8 +91,8 @@ const TopTracksPage = () => {
               </Typography>
               <Box
                 component="img"
-                src={track.albumImage}
-                alt={track.name}
+                src={artist.image}
+                alt={artist.name}
                 sx={{
                   width: 120,
                   height: 120,
@@ -102,10 +101,10 @@ const TopTracksPage = () => {
                 }}
               />
               <Box flex={1}>
-                <Typography variant="h6">{track.name}</Typography>
+                <Typography variant="h6">{artist.name}</Typography>
                 <Typography variant="body2">
-                  {track.artists.length > 0
-                    ? track.artists.join(", ")
+                  {artist.genres.length > 0
+                    ? artist.genres.join(", ")
                     : "No genres available"}
                 </Typography>
               </Box>
@@ -117,4 +116,4 @@ const TopTracksPage = () => {
   );
 };
 
-export default TopTracksPage;
+export default TopArtistsPage;
