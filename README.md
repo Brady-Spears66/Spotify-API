@@ -25,7 +25,7 @@ A sleek web app that displays personalized Spotify user data, including profile 
 ### Clone and Install
 
 ```bash
-git clone https://github.com/yourusername/spotify-stats.git
+git clone https://github.com/brady-spears66/spotify-stats.git
 cd spotify-stats
 npm install
 ```
