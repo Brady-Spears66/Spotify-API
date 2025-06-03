@@ -273,7 +273,7 @@ def search_spotify(access_token, query, search_type, limit):
             "image": item["images"][0]["url"] if item["images"] else "",
             "followers": item["followers"]["total"],
             "popularity": item["popularity"]
-        } for item in data["artists"]["items"]]
+        } for item in data["artists"]["items"][:3]]
     
     # Format albums
     if "albums" in data and data["albums"]["items"]:
@@ -285,7 +285,7 @@ def search_spotify(access_token, query, search_type, limit):
             "release_date": item["release_date"],
             "total_tracks": item["total_tracks"],
             "album_type": item["album_type"]
-        } for item in data["albums"]["items"]]
+        } for item in data["albums"]["items"][:3]]
 
     # Format tracks
     if "tracks" in data and data["tracks"]["items"]:
@@ -298,7 +298,7 @@ def search_spotify(access_token, query, search_type, limit):
             "duration_ms": item["duration_ms"],
             "explicit": item["explicit"],
             "preview__url": item.get("preview_url")
-        } for item in data["tracks"]["items"]]
+        } for item in data["tracks"]["items"][:5]]
     
     print(formatted_results)
 

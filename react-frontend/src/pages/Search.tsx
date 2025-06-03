@@ -407,6 +407,14 @@ const Search = () => {
         ) : activeCategory === "all" ? (
           // Show all categories
           <Stack spacing={4}>
+            {results.tracks && results.tracks.length > 0 && (
+              <Box>
+                <Typography variant="h5" sx={{ mb: 2, color: "#1db954" }}>
+                  Tracks
+                </Typography>
+                {renderTracks(results.tracks.slice(0, 5))}
+              </Box>
+            )}
             {results.artists && results.artists.length > 0 && (
               <Box>
                 <Typography variant="h5" sx={{ mb: 2, color: "#1db954" }}>
@@ -423,14 +431,6 @@ const Search = () => {
                 </Typography>
                 {renderAlbums(results.albums.slice(0, 5))}
                 <Divider sx={{ mt: 3 }} />
-              </Box>
-            )}
-            {results.tracks && results.tracks.length > 0 && (
-              <Box>
-                <Typography variant="h5" sx={{ mb: 2, color: "#1db954" }}>
-                  Tracks
-                </Typography>
-                {renderTracks(results.tracks.slice(0, 5))}
               </Box>
             )}
           </Stack>
