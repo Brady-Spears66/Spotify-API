@@ -75,20 +75,33 @@ def refresh_access_token():
 
     res = requests.post(url, headers=headers, data=data)
     if res.status_code != 200:
-        return jsonify({"error": "Failed to refresh token", "details": res.json()}), 400
+        # Safe JSON parsing for error responses
+        try:
+            error_details = res.json()
+        except requests.exceptions.JSONDecodeError:
+            error_details = {"message": res.text or "Unknown error"}
+        return jsonify({"error": "Failed to refresh token", "details": error_details}), 400
 
     return jsonify(res.json())
 
 
 @app.route("/top-tracks")
 def top_tracks():
-    # Updated to use Authorization header like top-artists
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return jsonify({"error": "Missing or invalid Authorization header"}), 400
 
     access_token = auth_header.split(" ")[1]
-    tracks = get_user_top_tracks(access_token)
+    
+    # Get time_range from query parameters, default to medium_term
+    time_range = request.args.get("time_range", "medium_term")
+    
+    # Validate time_range parameter
+    valid_time_ranges = ["short_term", "medium_term", "long_term"]
+    if time_range not in valid_time_ranges:
+        return jsonify({"error": "Invalid time_range parameter"}), 400
+    
+    tracks = get_user_top_tracks(access_token, time_range)
     if not tracks:
         return jsonify({"error": "Failed to fetch top tracks"}), 400
 
@@ -102,7 +115,16 @@ def top_artists():
         return jsonify({"error": "Missing or invalid Authorization header"}), 400
 
     access_token = auth_header.split(" ")[1]
-    artists = get_user_top_artists(access_token)
+    
+    # Get time_range from query parameters, default to medium_term
+    time_range = request.args.get("time_range", "medium_term")
+    
+    # Validate time_range parameter
+    valid_time_ranges = ["short_term", "medium_term", "long_term"]
+    if time_range not in valid_time_ranges:
+        return jsonify({"error": "Invalid time_range parameter"}), 400
+    
+    artists = get_user_top_artists(access_token, time_range)
     if not artists:
         return jsonify({"error": "Failed to fetch top artists"}), 400
 
@@ -121,7 +143,12 @@ def get_user_profile():
     res = requests.get(url, headers=headers)
     if res.status_code != 200:
         print("User Profile error:", res.status_code, res.text)
-        return jsonify({"error": "Failed to fetch user profile", "details": res.json()}), res.status_code
+        # Safe JSON parsing for error responses
+        try:
+            error_details = res.json()
+        except requests.exceptions.JSONDecodeError:
+            error_details = {"message": res.text or "Unknown error"}
+        return jsonify({"error": "Failed to fetch user profile", "details": error_details}), res.status_code
 
     data = res.json()
 
@@ -158,8 +185,8 @@ def exchange_code_for_token(code):
     return res.json()
 
 
-def get_user_top_tracks(access_token):
-    url = "https://api.spotify.com/v1/me/top/tracks?limit=50"
+def get_user_top_tracks(access_token, time_range="medium_term"):
+    url = f"https://api.spotify.com/v1/me/top/tracks?limit=50&time_range={time_range}"
     headers = {"Authorization": f"Bearer {access_token}"}
     res = requests.get(url, headers=headers)
     if res.status_code != 200:
@@ -170,13 +197,13 @@ def get_user_top_tracks(access_token):
     tracks = [{
         "name": item["name"],
         "artists": [artist['name'] for artist in item['artists']],
-        "albumImage": item["album"]["images"][0]["url"] if item["album"]["images"] else ""
+        "albumImage": item["album"]["images"][0]["url"] if item["album"]["images"] else "",
+        "album": item["album"]["name"]  # Added album name
     } for item in data.get("items", [])]
     return tracks
 
-
-def get_user_top_artists(access_token):
-    url = "https://api.spotify.com/v1/me/top/artists?limit=50"
+def get_user_top_artists(access_token, time_range="medium_term"):
+    url = f"https://api.spotify.com/v1/me/top/artists?limit=50&time_range={time_range}"
     headers = {"Authorization": f"Bearer {access_token}"}
     res = requests.get(url, headers=headers)
     if res.status_code != 200:
@@ -187,10 +214,10 @@ def get_user_top_artists(access_token):
     artists = [{
         "name": item["name"],
         "genres": item.get('genres', []),
-        "image": item["images"][0]["url"] if item["images"] else ""
+        "image": item["images"][0]["url"] if item["images"] else "",
+        "followers": item["followers"]["total"]  # Added followers count
     } for item in data.get("items", [])]
     return artists
-
 
 if __name__ == "__main__":
     app.run(debug=True)

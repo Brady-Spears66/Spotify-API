@@ -241,6 +241,8 @@ const ResponsiveAppBar: React.FC<NavProps> = ({
                   borderRadius: 5,
                   color: location.pathname === item.path ? "#1DB954" : "white",
                   fontSize: { md: "0.7rem", lg: "1.2rem" },
+                  "&:focus": { outline: "none" },
+                  "&:focus-visible": { outline: "none" },
                 }}
               >
                 {item.label}

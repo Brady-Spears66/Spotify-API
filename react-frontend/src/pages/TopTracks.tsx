@@ -1,13 +1,35 @@
 import { useEffect, useState } from "react";
-import { Box, Stack, Typography, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Stack,
+  Typography,
+  CircularProgress,
+  Tabs,
+  Tab,
+} from "@mui/material";
 import type { Track } from "../types";
+
+type TimeRange = "short_term" | "medium_term" | "long_term";
+
+interface TimeRangeOption {
+  value: TimeRange;
+  label: string;
+}
+
+const timeRangeOptions: TimeRangeOption[] = [
+  { value: "short_term", label: "1 Month" },
+  { value: "medium_term", label: "6 Months" },
+  { value: "long_term", label: "1 Year" },
+];
 
 const TopTracksPage = () => {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTimeRange, setSelectedTimeRange] =
+    useState<TimeRange>("medium_term");
 
-  useEffect(() => {
+  const fetchTopTracks = (timeRange: TimeRange) => {
     const token = localStorage.getItem("spotify_access_token");
     if (!token) {
       setError("Missing access token.");
@@ -15,7 +37,10 @@ const TopTracksPage = () => {
       return;
     }
 
-    fetch("http://127.0.0.1:5000/top-tracks", {
+    setLoading(true);
+    setError(null);
+
+    fetch(`http://127.0.0.1:5000/top-tracks?time_range=${timeRange}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -33,10 +58,25 @@ const TopTracksPage = () => {
       })
       .catch((err) => {
         console.error("Fetch error:", err);
-        setError("Failed to load top artists.");
+        setError("Failed to load top tracks.");
         setLoading(false);
       });
-  }, []);
+  };
+
+  useEffect(() => {
+    fetchTopTracks(selectedTimeRange);
+  }, [selectedTimeRange]);
+
+  const handleTimeRangeChange = (
+    _event: React.SyntheticEvent,
+    newValue: number
+  ) => {
+    setSelectedTimeRange(timeRangeOptions[newValue].value);
+  };
+
+  const selectedTabIndex = timeRangeOptions.findIndex(
+    (option) => option.value === selectedTimeRange
+  );
 
   return (
     <Box
@@ -50,19 +90,55 @@ const TopTracksPage = () => {
         boxSizing: "border-box",
       }}
     >
+      {/* Time Range Tabs */}
+      <Box sx={{ mb: 3, width: "100%", maxWidth: 800 }}>
+        <Tabs
+          value={selectedTabIndex}
+          onChange={handleTimeRangeChange}
+          centered
+          sx={{
+            mb: 2,
+            "& .MuiTabs-indicator": {
+              backgroundColor: "#1db954", // Spotify green
+            },
+            "& .MuiTab-root": {
+              "&.Mui-selected": {
+                color: "#1db954",
+              },
+              "& .MuiTouchRipple-root": {
+                display: "none", // This also removes the ripple effect
+              },
+            },
+          }}
+        >
+          {timeRangeOptions.map((option) => (
+            <Tab
+              key={option.value}
+              label={option.label}
+              sx={{
+                color: "White",
+                borderRadius: 5,
+                "&:focus": { outline: "none" },
+                "&:focus-visible": { outline: "none" },
+              }}
+            />
+          ))}
+        </Tabs>
+      </Box>
+
       <Typography variant="h2" gutterBottom textAlign="center">
         Your Top Tracks
       </Typography>
 
       {loading ? (
-        <CircularProgress />
+        <CircularProgress sx={{ color: "#1db954" }} />
       ) : error ? (
         <Typography color="error" variant="body1" textAlign="center">
           {error}
         </Typography>
       ) : tracks.length === 0 ? (
         <Typography variant="body1" color="text.secondary" textAlign="center">
-          No top artists available.
+          No top tracks available for this time period.
         </Typography>
       ) : (
         <Stack spacing={3} alignItems="center" width="100%" maxWidth={800}>
@@ -101,7 +177,10 @@ const TopTracksPage = () => {
                 <Typography variant="body2">
                   {track.artists.length > 0
                     ? track.artists.join(", ")
-                    : "No genres available"}
+                    : "No artists available"}
+                </Typography>
+                <Typography variant="body2" color="grey">
+                  {track.album}
                 </Typography>
               </Box>
             </Stack>

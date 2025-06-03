@@ -10,11 +10,13 @@ type Artist = {
   name: string;
   genres: string[];
   image: string;
+  followers: number;
 };
 
 interface Track {
   name: string;
   artists: string[];
+  album: string;
   albumImage: string;
 }
 
