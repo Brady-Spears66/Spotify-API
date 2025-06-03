@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Box,
-  Typography,
-  Avatar,
-  Paper,
-  useTheme,
-  Button,
-} from "@mui/material";
+import { Box, Typography, Avatar, Paper, Button } from "@mui/material";
 import type { User } from "../types";
 
 interface ProfileProps {
@@ -20,7 +13,6 @@ const Profile: React.FC<ProfileProps> = ({
   setUserProfile,
   setLoggedIn,
 }) => {
-  const theme = useTheme();
   if (!userProfile) {
     return (
       <Box
@@ -68,7 +60,7 @@ const Profile: React.FC<ProfileProps> = ({
           borderRadius: 4,
           minWidth: "300px",
           maxWidth: "500px",
-          bgcolor: "#1ED760",
+          bgcolor: "grey",
         }}
       >
         <Box
@@ -86,25 +78,26 @@ const Profile: React.FC<ProfileProps> = ({
               width: 100,
               height: 100,
               fontSize: "2rem",
-              bgcolor: theme.palette.secondary.main,
+              bgcolor: "#1ED760",
+              color: "black",
             }}
           >
             {!userProfile.image && userProfile.username[0].toUpperCase()}
           </Avatar>
 
-          <Typography variant="h5" fontWeight={600}>
+          <Typography variant="h5" fontWeight={600} sx={{ color: "white" }}>
             {userProfile.username}
           </Typography>
 
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="white">
             Country: {userProfile.country}
           </Typography>
 
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="white">
             Followers: {userProfile.followers}
           </Typography>
 
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="white">
             Email: {userProfile.email}
           </Typography>
         </Box>
@@ -112,7 +105,7 @@ const Profile: React.FC<ProfileProps> = ({
 
       <Button
         variant="outlined"
-        sx={{ bgcolor: "grey", color: "text.primary" }}
+        sx={{ bgcolor: "#1ED760", color: "text.primary" }}
         onClick={logout}
       >
         Logout

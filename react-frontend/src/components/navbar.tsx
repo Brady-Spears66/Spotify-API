@@ -279,7 +279,8 @@ const ResponsiveAppBar: React.FC<NavProps> = ({
               >
                 <Avatar
                   sx={{
-                    bgcolor: theme.palette.secondary.main,
+                    bgcolor: "#1ED760",
+                    color: "black",
                     width: 32,
                     height: 32,
                     fontSize: "0.9rem",
