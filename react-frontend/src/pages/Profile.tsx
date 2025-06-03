@@ -58,7 +58,7 @@ const Profile: React.FC<ProfileProps> = ({
         gap: 5,
       }}
     >
-      <Typography variant="h1" gutterBottom textAlign="center">
+      <Typography variant="h2" gutterBottom textAlign="center">
         Your Profile
       </Typography>
       <Paper

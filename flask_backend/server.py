@@ -130,6 +130,35 @@ def top_artists():
 
     return jsonify(artists)
 
+@app.route("/search")
+def search():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Missing or invalid Authorization header"}), 400
+    
+    access_token = auth_header.split(" ")[1]
+
+    # Get search query and type from the query parameters
+    query = request.args.get("q", "").strip()
+    search_type = request.args.get("type", "artist,album,track").strip()
+    limit = request.args.get("limit", "10").strip()
+
+    if not query:
+        return jsonify({"error": "Missing search query"}), 400
+    
+    # Validate search types
+    valid_types = ["artist", "album", "track", "playlist"]
+    types = [t.strip() for t in search_type.split(",")]
+    for t in types:
+        if t not in valid_types:
+            return jsonify({"error": f"Invalid search type: {t}"}), 400
+    
+    search_results = search_spotify(access_token, query, search_type, limit)
+    if search_results is None:
+        return jsonify({"error": "Failed to fetch search results"}), 400
+    
+    return jsonify(search_results)
+
 @app.route("/user-profile")
 def get_user_profile():
     auth_header = request.headers.get("Authorization")
@@ -219,5 +248,62 @@ def get_user_top_artists(access_token, time_range="medium_term"):
     } for item in data.get("items", [])]
     return artists
 
+def search_spotify(access_token, query, search_type, limit):
+    # URL encode the query
+    encoded_query = urllib.parse.quote(query)
+    url = f"https://api.spotify.com/v1/search?q={encoded_query}&type={search_type}&limit={limit}"
+
+    headers = {"Authorization": f"Bearer {access_token}"}
+    res = requests.get(url, headers=headers)
+
+    if res.status_code != 200:
+        print("Search error:", res.status_code, res.text)
+        return None
+    data = res.json()
+
+    # Format the response to match our expectations on the front end
+    formatted_results = {}
+
+    # Format artists
+    if "artists" in data and data["artists"]["items"]:
+        formatted_results["artists"] = [{
+            "id": item["id"],
+            "name": item["name"],
+            "genres": item.get("genres", []),
+            "image": item["images"][0]["url"] if item["images"] else "",
+            "followers": item["followers"]["total"],
+            "popularity": item["popularity"]
+        } for item in data["artists"]["items"]]
+    
+    # Format albums
+    if "albums" in data and data["albums"]["items"]:
+        formatted_results["albums"] = [{
+            "id": item["id"],
+            "name": item["name"],
+            "artists": [artist["name"] for artist in item["artists"]],
+            "image": item["images"][0]["url"] if item["images"] else "",
+            "release_date": item["release_date"],
+            "total_tracks": item["total_tracks"],
+            "album_type": item["album_type"]
+        } for item in data["albums"]["items"]]
+
+    # Format tracks
+    if "tracks" in data and data["tracks"]["items"]:
+        formatted_results["tracks"] = [{
+            "id": item["id"],
+            "name": item["name"],
+            "artists": [artist["name"] for artist in item["artists"]],
+            "album": item["album"]["name"],
+            "albumImage": item["album"]["images"][0]["url"] if item["album"]["images"] else "",
+            "duration_ms": item["duration_ms"],
+            "explicit": item["explicit"],
+            "preview__url": item.get("preview_url")
+        } for item in data["tracks"]["items"]]
+    
+    print(formatted_results)
+
+    return formatted_results
+
 if __name__ == "__main__":
     app.run(debug=True)
+

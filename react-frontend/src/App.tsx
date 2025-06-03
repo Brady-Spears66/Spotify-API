@@ -9,6 +9,7 @@ import TopArtists from "./pages/TopArtists";
 import { useEffect, useState } from "react";
 import type { User } from "./types";
 import Profile from "./pages/Profile";
+import Search from "./pages/Search";
 
 function App() {
   // @ts-ignore
@@ -83,6 +84,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/top-tracks" element={<TopTracks />} />
             <Route path="/top-artists" element={<TopArtists />} />
+            <Route path="/search" element={<Search />} />
             <Route
               path="/profile"
               element={

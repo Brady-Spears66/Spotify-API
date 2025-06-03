@@ -71,6 +71,7 @@ const ResponsiveAppBar: React.FC<NavProps> = ({
     { label: "Home", path: "/" },
     { label: "Top Tracks", path: "/top-tracks" },
     { label: "Top Artists", path: "/top-artists" },
+    { label: "Search", path: "/search" },
   ];
 
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
@@ -218,7 +219,7 @@ const ResponsiveAppBar: React.FC<NavProps> = ({
               component="img"
               src={spotifyLogo}
               alt="Mobile Logo"
-              sx={{ height: "50px", width: "auto", cursor: "pointer" }}
+              sx={{ height: "4vh", width: "auto", cursor: "pointer" }}
               onClick={() => navigate("/")}
             />
           </Box>
