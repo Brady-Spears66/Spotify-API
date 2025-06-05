@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, redirect
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
 import os
 import base64
@@ -191,6 +191,120 @@ def get_user_profile():
 
     return jsonify(user)
 
+@app.route("/album/<album_id>", methods=["GET", "OPTIONS"])
+@cross_origin(origins="http://localhost:5173")
+def get_album(album_id):
+    if request.method == "OPTIONS":
+        return '', 200  # Handle preflight manually (optional)
+
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Missing or invalid Authorization header"}), 400
+
+    access_token = auth_header.split(" ")[1]
+
+    url = f"https://api.spotify.com/v1/albums/{album_id}"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    res = requests.get(url, headers=headers)
+
+    if res.status_code != 200:
+        print("Album fetch error:", res.status_code, res.text)
+        return jsonify({"error": "Failed to fetch album"}), res.status_code
+
+    data = res.json()
+    album = {
+        "id": data["id"],
+        "name": data["name"],
+        "artists": data['artists'],
+        "tracks": data["tracks"]["items"],
+        "image": data["images"][0]["url"] if data["images"] else "",
+        "release_date": data["release_date"],
+        "total_tracks": data["total_tracks"],
+        "album_type": data["album_type"]
+    }
+    return jsonify(album)
+
+@app.route("/track/<track_id>", methods=["GET", "OPTIONS"])
+@cross_origin(origins="http://localhost:5173")
+def get_tracks(track_id):
+    if request.method == "OPTIONS":
+        return '', 200  # Handle preflight manually (optional)
+
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Missing or invalid Authorization header"}), 400
+
+    access_token = auth_header.split(" ")[1]
+
+    url = f"https://api.spotify.com/v1/tracks/{track_id}"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    res = requests.get(url, headers=headers)
+
+    if res.status_code != 200:
+        print("Track fetch error:", res.status_code, res.text)
+        return jsonify({"error": "Failed to fetch track"}), res.status_code
+
+    data = res.json()
+    track = {
+        "id": data["id"],
+        "name": data["name"],
+        "artists": data['artists'],
+        "albumImage": data["album"]["images"][0]["url"] if data["album"]["images"] else "",
+        "album": data["album"]["name"],
+        "explicit": data['explicit'],
+        "duration_ms": data["duration_ms"],
+    }
+    return jsonify(track)
+
+@app.route("/artist/<artist_id>", methods=["GET", "OPTIONS"])
+@cross_origin(origins="http://localhost:5173")
+def get_artist(artist_id):
+    if request.method == "OPTIONS":
+        return '', 200  # Handle preflight manually (optional)
+
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Missing or invalid Authorization header"}), 400
+
+    access_token = auth_header.split(" ")[1]
+
+    url = f"https://api.spotify.com/v1/artists/{artist_id}"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    res = requests.get(url, headers=headers)
+
+    if res.status_code != 200:
+        print("Artist fetch error:", res.status_code, res.text)
+        return jsonify({"error": "Failed to fetch artist"}), res.status_code
+
+    data = res.json()
+    url2 = f"https://api.spotify.com/v1/artists/{artist_id}/top-tracks?market=US"
+
+    headers2 = {"Authorization": f"Bearer {access_token}"}
+    res2 = requests.get(url2, headers=headers2)
+    data2 = res2.json()
+    print("Raw response: ", data2)
+
+    tracks = [{
+            "id": item["id"],
+            "name": item["name"],
+            "artists": item['artists'],
+            "albumImage": item["album"]["images"][0]["url"] if item["album"]["images"] else "",
+            "album": item["album"]["name"],  # Added album name
+            "explicit": item['explicit'],
+            "duration_ms": item["duration_ms"],
+        } for item in data2.get("tracks", [])]
+    
+    print("Tracks being returned:", tracks)
+    artist = {
+        "id": data["id"],
+        "name": data["name"],
+        "genres": data.get("genres", []),
+        "followers": data["followers"]["total"],
+        "popularity": data["popularity"],
+        "image": data["images"][0]["url"] if data.get("images") else "",
+        "topTracks": tracks,
+    }
+    return jsonify(artist)
 
 def exchange_code_for_token(code):
     url = "https://accounts.spotify.com/api/token"
@@ -224,10 +338,12 @@ def get_user_top_tracks(access_token, time_range="medium_term"):
 
     data = res.json()
     tracks = [{
+        "id": item["id"],
         "name": item["name"],
-        "artists": [artist['name'] for artist in item['artists']],
+        "artists": item['artists'],
         "albumImage": item["album"]["images"][0]["url"] if item["album"]["images"] else "",
-        "album": item["album"]["name"]  # Added album name
+        "album": item["album"]["name"],  # Added album name
+        "explicit": item['explicit'],
     } for item in data.get("items", [])]
     return tracks
 
@@ -241,6 +357,7 @@ def get_user_top_artists(access_token, time_range="medium_term"):
 
     data = res.json()
     artists = [{
+        "id": item["id"],
         "name": item["name"],
         "genres": item.get('genres', []),
         "image": item["images"][0]["url"] if item["images"] else "",

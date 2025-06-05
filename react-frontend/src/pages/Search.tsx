@@ -17,12 +17,14 @@ import {
   PlayArrow,
   Stop,
 } from "@mui/icons-material";
-import type {
-  SearchResults,
-  SearchArtist,
-  SearchAlbum,
-  SearchTrack,
+import {
+  formatDuration,
+  type Album,
+  type Artist,
+  type SearchResults,
+  type Track,
 } from "../types";
+import { useNavigate } from "react-router-dom";
 
 type SearchCategory = "all" | "artists" | "albums" | "tracks";
 
@@ -49,8 +51,9 @@ const Search = () => {
     null
   );
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const handlePreviewPlay = (track: SearchTrack) => {
+  const handlePreviewPlay = (track: Track) => {
     if (!track.previewUrl) return;
 
     if (currentPreview) {
@@ -139,13 +142,7 @@ const Search = () => {
     setActiveCategory(newValue);
   };
 
-  const formatDuration = (ms: number) => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = ((ms % 60000) / 1000).toFixed(0);
-    return `${minutes}:${seconds.padStart(2, "0")}`;
-  };
-
-  const renderArtists = (artists: SearchArtist[]) => (
+  const renderArtists = (artists: Artist[]) => (
     <Stack spacing={2}>
       {artists.map((artist) => (
         <Stack
@@ -153,6 +150,7 @@ const Search = () => {
           direction="row"
           spacing={2}
           alignItems="center"
+          onClick={(_) => navigate(`/artist/${artist.id}`)}
           sx={{
             p: 2,
             borderRadius: 2,
@@ -194,7 +192,7 @@ const Search = () => {
     </Stack>
   );
 
-  const renderAlbums = (albums: SearchAlbum[]) => (
+  const renderAlbums = (albums: Album[]) => (
     <Stack spacing={2}>
       {albums.map((album) => (
         <Stack
@@ -202,6 +200,7 @@ const Search = () => {
           direction="row"
           spacing={2}
           alignItems="center"
+          onClick={(_) => navigate(`/album/${album.id}`)}
           sx={{
             p: 2,
             borderRadius: 2,
@@ -234,7 +233,7 @@ const Search = () => {
     </Stack>
   );
 
-  const renderTracks = (tracks: SearchTrack[]) => (
+  const renderTracks = (tracks: Track[]) => (
     <Stack spacing={2}>
       {tracks.map((track) => (
         <Stack
@@ -242,6 +241,7 @@ const Search = () => {
           direction="row"
           spacing={2}
           alignItems="center"
+          onClick={(_) => navigate(`/track/${track.id}`)}
           sx={{
             p: 2,
             borderRadius: 2,
@@ -266,7 +266,7 @@ const Search = () => {
               {track.explicit && (
                 <ExplicitSharp sx={{ mr: 1, verticalAlign: "middle" }} />
               )}
-              {track.artists.join(", ")} • {track.album}
+              {track.artists.join(", ")} • {track.album.name}
             </Typography>
           </Box>
           <Typography variant="body2" color="grey">

@@ -8,6 +8,7 @@ import {
   Tab,
 } from "@mui/material";
 import type { Track } from "../types";
+import { ExplicitSharp } from "@mui/icons-material";
 
 type TimeRange = "short_term" | "medium_term" | "long_term";
 
@@ -174,13 +175,12 @@ const TopTracksPage = () => {
               />
               <Box flex={1}>
                 <Typography variant="h6">{track.name}</Typography>
-                <Typography variant="body2">
-                  {track.artists.length > 0
-                    ? track.artists.join(", ")
-                    : "No artists available"}
-                </Typography>
                 <Typography variant="body2" color="grey">
-                  {track.album}
+                  {track.explicit && (
+                    <ExplicitSharp sx={{ mr: 1, verticalAlign: "middle" }} />
+                  )}
+                  {track.artists.map((artist) => artist.name).join(", ")} •{" "}
+                  {track.album.name}
                 </Typography>
               </Box>
             </Stack>

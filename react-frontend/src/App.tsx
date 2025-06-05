@@ -10,6 +10,9 @@ import { useEffect, useState } from "react";
 import type { User } from "./types";
 import Profile from "./pages/Profile";
 import Search from "./pages/Search";
+import { ArtistPage } from "./pages/ArtistPage";
+import { AlbumPage } from "./pages/AlbumPage";
+import { TrackPage } from "./pages/TrackPage";
 
 function App() {
   // @ts-ignore
@@ -85,6 +88,9 @@ function App() {
             <Route path="/top-tracks" element={<TopTracks />} />
             <Route path="/top-artists" element={<TopArtists />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/artist/:id" element={<ArtistPage />} />
+            <Route path="/album/:id" element={<AlbumPage />} />
+            <Route path="/track/:id" element={<TrackPage />} />
             <Route
               path="/profile"
               element={
