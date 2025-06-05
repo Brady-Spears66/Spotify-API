@@ -8,34 +8,84 @@ import {
   CardContent,
   Box,
   Stack,
+  CircularProgress,
 } from "@mui/material";
-import { formatDuration, type Track } from "../types";
 import { ExplicitSharp } from "@mui/icons-material";
+import { formatDuration, type Track } from "../types";
 
 export const TrackPage = () => {
   const { id } = useParams();
-  const [track, setTrack] = useState<Track | null>(null);
   const navigate = useNavigate();
+
+  const [track, setTrack] = useState<Track | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTrack = async () => {
       const token = localStorage.getItem("spotify_access_token");
-      const res = await fetch(`http://127.0.0.1:5000/track/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
-      setTrack(data);
+      if (!token) {
+        setError("No access token found.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://127.0.0.1:5000/track/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || "Failed to fetch track.");
+        }
+
+        const data = await res.json();
+        setTrack(data);
+      } catch (err: unknown) {
+        console.error("Error fetching track:", err);
+        //@ts-ignore
+        setError(err.message || "Something went wrong.");
+      } finally {
+        setLoading(false);
+      }
     };
 
+    setLoading(true);
+    setError(null);
     fetchTrack();
   }, [id]);
 
-  if (!track) {
-    return <Typography>Loading track...</Typography>;
+  // Show loading spinner
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress sx={{ color: "#1db954" }} />
+      </Box>
+    );
   }
 
+  // Show error message
+  if (error) {
+    return (
+      <Typography color="error" variant="body1" textAlign="center" mt={4}>
+        {error}
+      </Typography>
+    );
+  }
+
+  // No track found
+  if (!track) {
+    return (
+      <Typography variant="body1" textAlign="center" mt={4}>
+        Track not found.
+      </Typography>
+    );
+  }
+
+  // Render track info
   return (
     <Container sx={{ mt: 4 }}>
       <Card sx={{ bgcolor: "#242424", color: "white" }}>
@@ -53,12 +103,42 @@ export const TrackPage = () => {
               <ExplicitSharp sx={{ ml: 1, verticalAlign: "middle" }} />
             )}
           </Typography>
+
           <Typography variant="subtitle1" color="white" sx={{ mb: 1 }}>
-            By {track.artists.map((artist) => artist.name).join(", ")}
+            By{" "}
+            {track.artists.map((artist, index) => (
+              <span key={artist.id}>
+                <Box
+                  component="span"
+                  onClick={() => navigate(`/artist/${artist.id}`)}
+                  sx={{
+                    display: "inline",
+                    "&:hover": { color: "#1db954", cursor: "pointer" },
+                    cursor: "pointer",
+                  }}
+                >
+                  {artist.name}
+                </Box>
+                {index < track.artists.length - 1 && ", "}
+              </span>
+            ))}
           </Typography>
+
           <Typography variant="body2" color="grey">
-            Album: {track.album.name}
+            Album:{" "}
+            <Box
+              component="span"
+              onClick={() => navigate(`/album/${track.album.id}`)}
+              sx={{
+                display: "inline",
+                "&:hover": { color: "#1db954", cursor: "pointer" },
+                cursor: "pointer",
+              }}
+            >
+              {track.album.name}
+            </Box>
           </Typography>
+
           <Typography variant="body2" color="grey">
             Duration: {formatDuration(track.duration_ms)}
           </Typography>

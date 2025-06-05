@@ -40,7 +40,7 @@ function Home() {
             </Typography>
             <Button
               variant="contained"
-              sx={{ mt: 2, bgcolor: "#1DB954" }}
+              sx={{ mt: 2, bgcolor: "#1DB954", color: "black" }}
               onClick={() => navigate("/top-tracks")}
             >
               View Top Tracks
@@ -58,7 +58,7 @@ function Home() {
             </Typography>
             <Button
               variant="contained"
-              sx={{ mt: 2, bgcolor: "#1DB954" }}
+              sx={{ mt: 2, bgcolor: "#1DB954", color: "black" }}
               onClick={() => navigate("/top-artists")}
             >
               View Top Artists
@@ -76,7 +76,7 @@ function Home() {
             </Typography>
             <Button
               variant="contained"
-              sx={{ mt: 2, bgcolor: "#1DB954" }}
+              sx={{ mt: 2, bgcolor: "#1DB954", color: "black" }}
               onClick={() => navigate("/profile")}
             >
               View Profile

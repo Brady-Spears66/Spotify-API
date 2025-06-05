@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import type { Track } from "../types";
 import { ExplicitSharp } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 type TimeRange = "short_term" | "medium_term" | "long_term";
 
@@ -50,7 +51,6 @@ const TopTracksPage = () => {
       .then((data) => {
         if (Array.isArray(data)) {
           setTracks(data);
-          console.log(data);
         } else {
           setError("Unexpected response from server.");
           console.error("Server response:", data);
@@ -78,6 +78,7 @@ const TopTracksPage = () => {
   const selectedTabIndex = timeRangeOptions.findIndex(
     (option) => option.value === selectedTimeRange
   );
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -174,13 +175,57 @@ const TopTracksPage = () => {
                 }}
               />
               <Box flex={1}>
-                <Typography variant="h6">{track.name}</Typography>
+                <Box
+                  onClick={(_) => navigate(`/track/${track.id}`)}
+                  sx={{
+                    display: "inline-block",
+                    "&:hover": {
+                      color: "#1db954",
+                      cursor: "pointer",
+                    },
+                    cursor: "pointer",
+                  }}
+                >
+                  <Typography variant="h6">{track.name}</Typography>
+                </Box>
                 <Typography variant="body2" color="grey">
                   {track.explicit && (
                     <ExplicitSharp sx={{ mr: 1, verticalAlign: "middle" }} />
                   )}
-                  {track.artists.map((artist) => artist.name).join(", ")} •{" "}
-                  {track.album.name}
+                  {track.artists.map((artist, artistIndex) => (
+                    <span key={artist.id}>
+                      <Box
+                        component="span"
+                        onClick={() => navigate(`/artist/${artist.id}`)}
+                        sx={{
+                          display: "inline",
+                          "&:hover": {
+                            color: "#1db954",
+                            cursor: "pointer",
+                          },
+                          cursor: "pointer",
+                        }}
+                      >
+                        {artist.name}
+                      </Box>
+                      {artistIndex < track.artists.length - 1 && ", "}
+                    </span>
+                  ))}{" "}
+                  •{" "}
+                  <Box
+                    component="span"
+                    onClick={() => navigate(`/album/${track.album.id}`)}
+                    sx={{
+                      display: "inline",
+                      "&:hover": {
+                        color: "#1db954",
+                        cursor: "pointer",
+                      },
+                      cursor: "pointer",
+                    }}
+                  >
+                    {track.album.name}
+                  </Box>
                 </Typography>
               </Box>
             </Stack>

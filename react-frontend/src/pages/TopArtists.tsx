@@ -6,8 +6,10 @@ import {
   CircularProgress,
   Tabs,
   Tab,
+  Chip,
 } from "@mui/material";
 import type { Artist } from "../types";
+import { useNavigate } from "react-router-dom";
 
 type TimeRange = "short_term" | "medium_term" | "long_term";
 
@@ -77,6 +79,7 @@ const TopArtistsPage = () => {
     (option) => option.value === selectedTimeRange
   );
 
+  const navigate = useNavigate();
   return (
     <Box
       sx={{
@@ -172,12 +175,31 @@ const TopArtistsPage = () => {
                 }}
               />
               <Box flex={1}>
-                <Typography variant="h6">{artist.name}</Typography>
-                <Typography variant="body2">
-                  {artist.genres.length > 0
-                    ? artist.genres.join(", ")
-                    : "No genres available"}
-                </Typography>
+                <Box
+                  onClick={(_) => navigate(`/artist/${artist.id}`)}
+                  sx={{
+                    display: "inline-block",
+                    "&:hover": {
+                      color: "#1db954",
+                      cursor: "pointer",
+                    },
+                    cursor: "pointer",
+                  }}
+                >
+                  <Typography variant="h6">{artist.name}</Typography>
+                </Box>
+                {artist.genres.length > 0 && (
+                  <Box sx={{ mt: 1 }}>
+                    {artist.genres.slice(0, 3).map((genre) => (
+                      <Chip
+                        key={genre}
+                        label={genre}
+                        size="small"
+                        sx={{ mr: 0.5, mb: 0.5, color: "#1db954" }}
+                      />
+                    ))}
+                  </Box>
+                )}
                 <Typography variant="body2" color="grey">
                   Followers: {artist.followers.toLocaleString()}
                 </Typography>

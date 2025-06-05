@@ -250,7 +250,7 @@ def get_tracks(track_id):
         "name": data["name"],
         "artists": data['artists'],
         "albumImage": data["album"]["images"][0]["url"] if data["album"]["images"] else "",
-        "album": data["album"]["name"],
+        "album": data["album"],
         "explicit": data['explicit'],
         "duration_ms": data["duration_ms"],
     }
@@ -289,7 +289,7 @@ def get_artist(artist_id):
             "name": item["name"],
             "artists": item['artists'],
             "albumImage": item["album"]["images"][0]["url"] if item["album"]["images"] else "",
-            "album": item["album"]["name"],  # Added album name
+            "album": item["album"],
             "explicit": item['explicit'],
             "duration_ms": item["duration_ms"],
         } for item in data2.get("tracks", [])]
@@ -342,7 +342,7 @@ def get_user_top_tracks(access_token, time_range="medium_term"):
         "name": item["name"],
         "artists": item['artists'],
         "albumImage": item["album"]["images"][0]["url"] if item["album"]["images"] else "",
-        "album": item["album"]["name"],  # Added album name
+        "album": item["album"],  # Added album name
         "explicit": item['explicit'],
     } for item in data.get("items", [])]
     return tracks
