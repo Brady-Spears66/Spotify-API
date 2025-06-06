@@ -97,6 +97,7 @@ function App() {
                 <Profile
                   userProfile={userProfile}
                   setUserProfile={setUserProfile}
+                  loggedIn={loggedIn}
                   setLoggedIn={setLoggedIn}
                 />
               }
