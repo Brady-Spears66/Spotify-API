@@ -257,9 +257,11 @@ const ResponsiveAppBar: React.FC<NavProps> = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "flex-end",
-              minWidth: "150px",
+              // Fixed: Changed to flex: "1 1 0" for mobile to balance the layout
+              flex: { xs: "1 1 0", lg: "0 0 auto" },
+              // Removed minWidth for mobile, keep it for desktop
+              minWidth: { lg: "150px" },
               gap: 1,
-              flex: "0 0 auto",
             }}
           >
             {loggedIn && userProfile ? (
@@ -291,6 +293,7 @@ const ResponsiveAppBar: React.FC<NavProps> = ({
                 <Typography
                   variant="subtitle1"
                   sx={{
+                    display: { xs: "none", lg: "block" },
                     color: "white",
                     fontWeight: 500,
                     fontSize: { xs: "0.8rem", sm: "1rem" },
