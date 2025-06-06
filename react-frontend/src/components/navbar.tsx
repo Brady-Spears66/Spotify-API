@@ -305,7 +305,7 @@ const ResponsiveAppBar: React.FC<NavProps> = ({
             ) : (
               <Button
                 variant="contained"
-                sx={{ bgcolor: "#1ED760" }}
+                sx={{ bgcolor: "#1ED760", color: "black" }}
                 onClick={handleLogin}
               >
                 Login with Spotify

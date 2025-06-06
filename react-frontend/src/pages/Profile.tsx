@@ -1,34 +1,28 @@
 import React from "react";
 import { Box, Typography, Avatar, Paper, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import type { User } from "../types";
 
 interface ProfileProps {
   userProfile: User | null;
+  loggedIn: boolean;
   setUserProfile: React.Dispatch<React.SetStateAction<User | null>>;
   setLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Profile: React.FC<ProfileProps> = ({
   userProfile,
+  loggedIn,
   setUserProfile,
   setLoggedIn,
 }) => {
-  if (!userProfile) {
-    return (
-      <Box
-        sx={{
-          p: 4,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Typography variant="h5" color="error">
-          User not found. Please log in again.
-        </Typography>
-      </Box>
-    );
-  }
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    const res = await fetch("http://127.0.0.1:5000/login-url");
+    const data = await res.json();
+    window.location.href = data.url;
+  };
 
   const logout = () => {
     localStorage.removeItem("spotify_access_token");
@@ -36,7 +30,55 @@ const Profile: React.FC<ProfileProps> = ({
     localStorage.removeItem("userProfile");
     setLoggedIn(false);
     setUserProfile(null);
+    navigate("/");
   };
+
+  // Show login prompt if user is not logged in
+  if (!loggedIn || !userProfile) {
+    return (
+      <Box
+        sx={{
+          p: 4,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "80vh",
+          flexDirection: "column",
+          gap: 3,
+        }}
+      >
+        <Typography variant="h3" textAlign="center" gutterBottom>
+          Welcome to Your Profile
+        </Typography>
+        <Typography
+          variant="body1"
+          textAlign="center"
+          color="grey"
+          sx={{ mb: 3 }}
+        >
+          Please log in with your Spotify account to view your profile
+          information.
+        </Typography>
+        <Button
+          variant="contained"
+          size="large"
+          sx={{
+            bgcolor: "#1ED760",
+            color: "black",
+            fontWeight: 600,
+            px: 4,
+            py: 1.5,
+            "&:hover": {
+              bgcolor: "#1DB954",
+            },
+          }}
+          onClick={handleLogin}
+        >
+          Login with Spotify
+        </Button>
+      </Box>
+    );
+  }
 
   return (
     <Box
